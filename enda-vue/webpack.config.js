@@ -22,13 +22,22 @@ module.exports = {
         options: {
           name: '[name].[ext]?[hash]'
         }
-      }
+      },
+      {
+        test: /\.pug$/,
+        loader: 'pug-loader',
+      },
     ]
   },
   resolve: {
     alias: {
       'vue$': 'vue/dist/vue.esm.js'
     }
+  },
+  resolveLoader: {
+    alias: {
+      'pug-loader': path.join(__dirname, 'misc', 'pug-loader'),
+    },
   },
   plugins: [
     new HtmlWebpackPlugin({

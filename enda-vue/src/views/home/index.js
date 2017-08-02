@@ -1,6 +1,14 @@
+import template from './index.pug'
+
+console.log('')
+console.log('pug:')
+console.log(template)
+console.log('')
+
 export default {
-  // template: '<p>home page</p>'
-  // render: (h) => {
-  //   return h('p', ['hi'])
+  render: template
+  // template: '<p>home page</p>',
+  // render(h) {
+  //   return template.bind(this)(h)
   // }
 }
