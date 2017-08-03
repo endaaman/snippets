@@ -24,15 +24,18 @@ module.exports = {
         }
       },
       {
-        test: /\.pug$/,
+        test: /\.jade/,
         loader: 'pug-loader',
       },
     ]
   },
   resolve: {
+    // alias: {
+    //   'vue$': 'vue/dist/vue.esm.js'
+    // },
     alias: {
-      'vue$': 'vue/dist/vue.esm.js'
-    }
+      vue: 'vue/dist/vue.js'
+    },
   },
   resolveLoader: {
     alias: {

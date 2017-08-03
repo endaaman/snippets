@@ -1,14 +1,23 @@
-import template from './index.pug'
-
-console.log('')
-console.log('pug:')
-console.log(template)
-console.log('')
+import { mapState, mapGetters, mapActions } from 'vuex'
+import template from './index.jade'
 
 export default {
-  render: template
-  // template: '<p>home page</p>',
-  // render(h) {
-  //   return template.bind(this)(h)
-  // }
+  render: template,
+  computed: {
+    ...mapState({
+      count: state => state.count,
+      todos: state => state.todos
+    }),
+    ...mapGetters([
+      'todos/doneCount',
+    ]),
+  },
+  methods: {
+    ...mapActions([
+      'increment',
+    ]),
+    done() {
+      this.$store.dispatch('done')
+    }
+  }
 }

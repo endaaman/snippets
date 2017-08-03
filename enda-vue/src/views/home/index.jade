@@ -1,0 +1,16 @@
+.home
+  h2 count
+  p
+    | count: {{count}}
+  p
+    button(@click="increment(10)")
+      | Increment
+  hr
+  h2 todo
+  ul
+    li(v-for="todo in todos.items")
+      | id: {{todo.id}}
+      | text: {{todo.text}}
+      | done: {{todo.done ? 'DONE' : 'NOT DONE'}},
+  p
+    button(@click="done()") mark done

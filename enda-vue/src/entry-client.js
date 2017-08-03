@@ -1,9 +1,9 @@
 import Vue from 'vue'
-import App from './App'
+import Root from './root'
 import router from './router'
 
 
-const app = new Vue(App)
+const root = new Vue(Root)
 router.onReady(() => {
-  app.$mount('#app')
+  root.$mount('#root')
 })
