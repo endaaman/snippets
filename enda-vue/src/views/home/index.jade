@@ -1,4 +1,4 @@
-.home
+section.home
   h2 count
   p
     | count: {{count}}
@@ -9,8 +9,21 @@
   h2 todo
   ul
     li(v-for="todo in todos.items")
-      | id: {{todo.id}}
-      | text: {{todo.text}}
-      | done: {{todo.done ? 'DONE' : 'NOT DONE'}},
+      label
+        input(type="checkbox" v-model="selectedTodoIds" v-bind:value="todo.id")
+        | id: {{todo.id}}
+        | text: {{todo.text}}
+        | done: {{todo.done ? 'DONE' : 'NOT DONE'}}
+
+  el-table(ref='multipleTable', :data='todos.items', border='', style='width: 100%', @selection-change='onSelected')
+      el-table-column(type='selection', width='55')
+      el-table-column(property='id', label='ID', width='120')
+      el-table-column(property='text', label='Text', show-overflow-tooltip='')
+      el-table-column(label='Done', width='120')
+        template(scope='scope') {{ scope.row.done ? '✓' : '' }}
+
   p
-    button(@click="done()") mark done
+    button(@click="done") mark done
+    span &nbsp;
+    button(@click="undone") mark undone
+

@@ -1,11 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-const DONE = 'DONE'
+const MARK = 'MARK'
 
-Vue.use(Vuex)
-
-export default new Vuex.Store({
+export default {
+  namespaced: true,
   state: {
     items: [
       { id: 1, text: 'あかり', done: true },
@@ -15,16 +14,20 @@ export default new Vuex.Store({
     ],
   },
   mutations: {
-    DONE (state, { id }) {
-      t = state.todos.find(item => item.id === id)
-      if (t) {
-        t.done = true
-      }
+    MARK (state, { ids, done }) {
+      state.items
+        .filter(item => ids.includes(item.id))
+        .forEach((item) => {
+          item.done = !!done
+        })
     }
   },
   actions: {
-    done ({ commit }, id) {
-      commit(DONE, { id: 4 })
+    done({ commit }, ids) {
+      commit(MARK, { ids, done: true })
+    },
+    undone({ commit }, ids) {
+      commit(MARK, { ids, done: false })
     }
   },
   getters: {
@@ -35,4 +38,4 @@ export default new Vuex.Store({
       return state.items.filter(todo => todo.done).length
     },
   },
-})
+}

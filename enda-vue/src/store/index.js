@@ -4,11 +4,7 @@ import todos from './todos'
 
 const INCREMENT = "INCREMENT"
 
-Vue.use(Vuex)
-
-console.log(todos)
-
-export default new Vuex.Store({
+const store = {
   state: {
     count: 0,
   },
@@ -25,4 +21,8 @@ export default new Vuex.Store({
   modules: {
     todos,
   },
-})
+}
+
+export function createStore(initialState) {
+  return new Vuex.Store(store)
+}

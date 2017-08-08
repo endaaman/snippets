@@ -3,6 +3,11 @@ import template from './index.jade'
 
 export default {
   render: template,
+  data() {
+    return {
+      selectedTodoIds: [],
+    }
+  },
   computed: {
     ...mapState({
       count: state => state.count,
@@ -17,7 +22,13 @@ export default {
       'increment',
     ]),
     done() {
-      this.$store.dispatch('done')
+      this.$store.dispatch('todos/done', this.selectedTodoIds)
+    },
+    undone() {
+      this.$store.dispatch('todos/undone', this.selectedTodoIds)
+    },
+    onSelected(selectedItems) {
+      this.selectedTodoIds = selectedItems.map(todo => todo.id)
     }
   }
 }

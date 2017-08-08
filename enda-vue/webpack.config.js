@@ -1,6 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 module.exports = {
   entry: './src/entry-client.js',
@@ -13,19 +14,36 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        loader: 'babel-loader',
+        use: 'babel-loader',
         exclude: /node_modules/
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
-        loader: 'file-loader',
-        options: {
-          name: '[name].[ext]?[hash]'
-        }
+        use: {
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]?[hash]'
+          },
+        },
       },
       {
         test: /\.jade/,
-        loader: 'pug-loader',
+        use: 'pug-loader',
+      },
+      {
+        test: /\.css$/,
+        // use: [
+        //   'style-loader',
+        //   'css-loader',
+        // ]
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: "css-loader"
+        }),
+      },
+      {
+        test: /\.(eot|svg|ttf|woff|woff2)(\?\S*)?$/,
+        loader: 'file-loader'
       },
     ]
   },
@@ -47,6 +65,7 @@ module.exports = {
       template: './src/index.html',
       inject: 'body'
     }),
+    new ExtractTextPlugin('styles.css'),
   ],
   devServer: {
     historyApiFallback: true,
