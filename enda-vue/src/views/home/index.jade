@@ -2,6 +2,11 @@ section.home
   h2 count
   p
     | count: {{count}}
+  ul
+    li
+      router-link(to="/") Home
+    li
+      router-link(to="/hoge") Hoge
   p
     button(@click="increment(10)")
       | Increment

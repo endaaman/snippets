@@ -8,7 +8,8 @@ module.exports = function(content) {
   }
   const html = pug.compile(content , {})()
   const result = compiler.compile(html)
-  return 'module.exports = function(){' + result.render + '}'
+  // return 'module.exports = function(){' + result.render + '}'
+  return '' + result
 }
 
 module.exports.seperable = true

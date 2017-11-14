@@ -18,11 +18,12 @@ Module.prototype.require = function(...args){
 };
 
 const renderer = createRenderer()
-const router = require('./router').default
+const createRouter = require('./router').createRouter
 const Root = require('./root').default
 
 const server = express()
 server.get('*', (req, res) => {
+  const router = createRouter()
   router.push(req.url)
   const matchedComponents = router.getMatchedComponents()
 

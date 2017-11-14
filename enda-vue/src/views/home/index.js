@@ -2,7 +2,7 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 import template from './index.jade'
 
 export default {
-  render: template,
+  ...template,
   data() {
     return {
       selectedTodoIds: [],
