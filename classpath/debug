@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -eux
+
+./gradlew installDebug
+adb shell am start -n jp.co.infiniteloop.shukeen/.ui.activity.LoginActivity
