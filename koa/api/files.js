@@ -4,14 +4,14 @@ const cp = require('fs-cp')
 const busboy = require('async-busboy')
 const Router = require('koa-router')
 const config = require('../config')
-const updateCache = require('../middlewares/update-cache.js')
+const updateCache = require('../middlewares/update-cache')
 
 
 const router = new Router()
 
 function J(...args) { return path.join(...args) }
 
-function convertStatToData(stat, name, dir, compact = false) {
+function convertStatToData(stat, name, dir, compact) {
   if (compact) {
     return { name }
   } else {
@@ -29,7 +29,7 @@ function convertStatToData(stat, name, dir, compact = false) {
   }
 }
 
-async function walkDir(base, dir, compact = true) {
+async function walkDir(base, dir, compact) {
   const absDirName = J(base, ...dir)
   if (!fs.existsSync(absDirName)) {
     return null
@@ -47,9 +47,24 @@ async function walkDir(base, dir, compact = true) {
   return results
 }
 
+function getFiles(path, compact) {
+  return walkDir(config.FILES_DIR, path, compact)
+}
+
+
+function saveFiles(files, destDir) {
+  const filenames = []
+  const wg = []
+  for (const file of files) {
+    const filename = file.filename.toLowerCase()
+    filenames.push(filename)
+    wg.push(cp(file, J(destDir, filename)))
+  }
+  return Promise.all(wg)
+}
 
 router.get('/:path*', async (ctx, next) => {
-  const data = await walkDir(config.FILES_DIR, ctx.params.path ? [ctx.params.path] : ['.'], 'compact' in ctx.query)
+  const data = await getFiles(ctx.params.path ? [ctx.params.path] : ['.'], 'compact' in ctx.query)
   if (!data) {
     ctx.throw(404)
     return
@@ -82,14 +97,7 @@ router.post('/:dir*', updateCache, async (ctx, next) => {
     return
   }
 
-  const filenames = []
-  const wg = []
-  for (const file of files) {
-    const filename = file.filename.toLowerCase()
-    filenames.push(filename)
-    wg.push(cp(file, J(destDir, filename)))
-  }
-  await Promise.all(wg)
+  await saveFiles(files, destDir)
 
   ctx.status = 201
 })
@@ -125,7 +133,7 @@ router.put('/:path*', updateCache, async (ctx, next) => {
     return
   }
   if (!ctx.request.body.rename_to) {
-    ctx.throw(400, '`rename_to` field is needed')
+    ctx.throw(400, '`rename_to` field is required')
     return
   }
   const dest = J(config.FILES_DIR, ctx.request.body.rename_to)
@@ -146,7 +154,6 @@ router.put('/:path*', updateCache, async (ctx, next) => {
   }
 
   await fs.rename(src, dest)
-  // await cp(src, dest)
   ctx.status = 204
 })
 

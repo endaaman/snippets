@@ -7,14 +7,12 @@ const authMiddleware = require('./middlewares/auth.js')
 const memosRouter = require('./api/memos')
 const filesRouter = require('./api/files')
 const sessionRouter = require('./api/session')
-const MemoService = require('./services/memo.js')
 
 
 const app = new Koa()
 const router = new Router()
 
 app.context.authorized = false
-app.context.memoService = new MemoService()
 
 router.use('/memos', memosRouter.routes(), memosRouter.allowedMethods())
 router.use('/files', filesRouter.routes(), filesRouter.allowedMethods())
