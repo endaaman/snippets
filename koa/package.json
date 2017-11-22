@@ -1,11 +1,18 @@
 {
   "private": true,
   "dependencies": {
+    "bcrypt": "^1.0.3",
+    "jsonwebtoken": "^8.1.0",
     "koa": "^2.4.1",
+    "koa-bodyparser": "^4.2.0",
+    "koa-json": "^2.0.2",
     "koa-router": "^7.3.0"
   },
-  "scripts" : {
+  "scripts": {
     "start": "node index.js",
-    "watch": "nodemon --watch api --watch index.js index.js"
+    "watch": "nodemon --watch ./ index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.1"
   }
 }
