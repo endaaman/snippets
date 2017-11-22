@@ -1,13 +1,11 @@
 const Router = require('koa-router')
+const config = require('../config')
+
 
 const router = new Router()
 
 router.get('/', async (ctx, next) => {
-  ctx.body = 'Hello Koa'
-})
-
-router.get('/:id', async (ctx, next) => {
-  ctx.body = `id is ${ctx.params.id}`
+  ctx.body = await ctx.memoService.getMemos()
 })
 
 module.exports = router

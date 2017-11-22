@@ -1,9 +1,16 @@
 {
   "private": true,
   "dependencies": {
+    "async-busboy": "^0.6.2",
     "bcrypt": "^1.0.3",
+    "co-busboy": "^1.4.0",
+    "fs-cp": "^1.4.0",
+    "fs-extra": "^4.0.2",
+    "glob": "^7.1.2",
+    "js-yaml": "^3.10.0",
     "jsonwebtoken": "^8.1.0",
     "koa": "^2.4.1",
+    "koa-body": "^2.5.0",
     "koa-bodyparser": "^4.2.0",
     "koa-json": "^2.0.2",
     "koa-router": "^7.3.0"
