@@ -6,11 +6,24 @@ const config = require('../config')
 
 const MARKDONW_FILE_REG = /^20\d\d-((10|11|12)|0[1-9])-((30|31)|([1-2][0-9])|(0[1-9]))_.+\.md$/
 const MEMOS_DIR = 'memos'
+const MARKDOWN_DIR = path.join(config.FILES_DIR, MEMOS_DIR)
 
 let isUpdateNeeded = true
 let cached = null
 
-function parseMarkdown(text) {
+
+async function getNames() {
+  const allNames = await fs.readdir(MARKDOWN_DIR)
+  return allNames.filter(name => {
+    return MARKDONW_FILE_REG.test(name)
+  })
+}
+
+async function readMarkdownFile(name) {
+  const p = path.join(MARKDOWN_DIR, name)
+  const text = await fs.readFile(p, 'utf-8')
+  const stat = await fs.stat(p)
+
   const lines = text.split('\n')
   let count = 0
   const metaLines = []
@@ -28,23 +41,30 @@ function parseMarkdown(text) {
   }
 
   return {
+    name,
     content: contentLines.join('\n'),
-    meta: yaml.load(metaLines.join('\n')),
+    ...yaml.load(metaLines.join('\n')),
+    changed_at: stat.ctime,
   }
 }
 
-async function updateCache() {
-  const mdDir = path.join(config.FILES_DIR, MEMOS_DIR)
+async function checkIfRecachNeeded() {
+  if (!cached) {
+    return true
+  }
+  const names = await getNames()
+  const nameDict = names.reduce((o, m) => {
+    o[m.name] = m
+    return o
+  }, {})
+  console.log(nameDict)
+}
 
-  const allNames = await fs.readdir(mdDir)
-  const names = allNames.filter(name => MARKDONW_FILE_REG.test(name))
-
+async function recache() {
+  const names = await getNames()
   const wg = []
   for (const name of names) {
-    wg.push(
-      fs.readFile(path.join(mdDir, name), 'utf-8')
-      .then((text) => parseMarkdown(text) )
-    )
+    wg.push(readMarkdownFile(name))
   }
   cached = await Promise.all(wg)
   isUpdateNeeded = false
@@ -55,12 +75,13 @@ function needMemosCacheUpdate() {
 }
 
 async function getMemos() {
+  // const isNeededRecache = await checkIfRecachNeeded()
+  // console.log(isUpdateNeeded)
   if (isUpdateNeeded) {
-    await updateCache()
+    await recache()
   } else {
     console.log('using cache')
   }
-
   return cached
 }
 

@@ -1,70 +1,18 @@
 const path = require('path')
 const fs = require('fs-extra')
-const cp = require('fs-cp')
 const busboy = require('async-busboy')
 const Router = require('koa-router')
 const config = require('../config')
 const updateCache = require('../middlewares/update-cache')
+const { getFiles, saveFiles } = require('../handlers/file')
 
 
 const router = new Router()
 
 function J(...args) { return path.join(...args) }
 
-function convertStatToData(stat, name, dir, compact) {
-  if (compact) {
-    return { name }
-  } else {
-    return {
-      name,
-      dir,
-      extension: path.extname(name),
-      is_file: stat.isFile(),
-      is_dir: stat.isDirectory(),
-      size: stat.size,
-      atime: stat.atime,
-      ctime: stat.ctime,
-      mtime: stat.mtime,
-    }
-  }
-}
-
-async function walkDir(base, dir, compact) {
-  const absDirName = J(base, ...dir)
-  if (!fs.existsSync(absDirName)) {
-    return null
-  }
-  const results = []
-  const names = await fs.readdir(absDirName)
-  for (const name of names) {
-    const stat = await fs.stat(J(base, ...dir, name))
-    const data = convertStatToData(stat, name, dir, compact)
-    results.push(data)
-    if (stat.isDirectory()) {
-      data.children = await walkDir(base, dir.concat([name]), compact)
-    }
-  }
-  return results
-}
-
-function getFiles(path, compact) {
-  return walkDir(config.FILES_DIR, path, compact)
-}
-
-
-function saveFiles(files, destDir) {
-  const filenames = []
-  const wg = []
-  for (const file of files) {
-    const filename = file.filename.toLowerCase()
-    filenames.push(filename)
-    wg.push(cp(file, J(destDir, filename)))
-  }
-  return Promise.all(wg)
-}
-
 router.get('/:path*', async (ctx, next) => {
-  const data = await getFiles(ctx.params.path ? [ctx.params.path] : ['.'], 'compact' in ctx.query)
+  const data = await getFiles(ctx.params.path ? ctx.params.path : '.', 'compact' in ctx.query)
   if (!data) {
     ctx.throw(404)
     return
@@ -98,7 +46,6 @@ router.post('/:dir*', updateCache, async (ctx, next) => {
   }
 
   await saveFiles(files, destDir)
-
   ctx.status = 201
 })
 
