@@ -8,8 +8,8 @@ const MARKDONW_FILE_REG = /^20\d\d-((10|11|12)|0[1-9])-((30|31)|([1-2][0-9])|(0[
 const MEMOS_DIR = 'memos'
 const MARKDOWN_DIR = path.join(config.FILES_DIR, MEMOS_DIR)
 
-let isUpdateNeeded = true
 let cached = null
+let dirChangedAt = null
 
 
 async function getNames() {
@@ -48,18 +48,6 @@ async function readMarkdownFile(name) {
   }
 }
 
-async function checkIfRecachNeeded() {
-  if (!cached) {
-    return true
-  }
-  const names = await getNames()
-  const nameDict = names.reduce((o, m) => {
-    o[m.name] = m
-    return o
-  }, {})
-  console.log(nameDict)
-}
-
 async function recache() {
   const names = await getNames()
   const wg = []
@@ -67,17 +55,21 @@ async function recache() {
     wg.push(readMarkdownFile(name))
   }
   cached = await Promise.all(wg)
-  isUpdateNeeded = false
+  dirChangedAt = (await fs.stat(MARKDOWN_DIR)).mtime
 }
 
-function needMemosCacheUpdate() {
-  isUpdateNeeded = true
+async function checkIfChanged() {
+  if (!dirChangedAt) {
+    return true
+  }
+  const curChangedAt = (await fs.stat(MARKDOWN_DIR)).mtime
+  return dirChangedAt.getTime() !== curChangedAt.getTime()
 }
 
 async function getMemos() {
-  // const isNeededRecache = await checkIfRecachNeeded()
-  // console.log(isUpdateNeeded)
-  if (isUpdateNeeded) {
+  const isNeedRecache = await checkIfChanged()
+  if (isNeedRecache) {
+    console.log('update cache')
     await recache()
   } else {
     console.log('using cache')
@@ -85,4 +77,4 @@ async function getMemos() {
   return cached
 }
 
-module.exports = { getMemos, needMemosCacheUpdate }
+module.exports = { getMemos }

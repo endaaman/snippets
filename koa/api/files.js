@@ -3,7 +3,6 @@ const fs = require('fs-extra')
 const busboy = require('async-busboy')
 const Router = require('koa-router')
 const config = require('../config')
-const updateCache = require('../middlewares/update-cache')
 const { getFiles, saveFiles } = require('../handlers/file')
 
 
@@ -20,7 +19,7 @@ router.get('/:path*', async (ctx, next) => {
   ctx.body = data
 })
 
-router.post('/:dir*', updateCache, async (ctx, next) => {
+router.post('/:dir*', async (ctx, next) => {
   const destDir = J(config.FILES_DIR, ctx.params.dir || '')
   const { files, fields } = await busboy(ctx.req)
 
@@ -49,7 +48,7 @@ router.post('/:dir*', updateCache, async (ctx, next) => {
   ctx.status = 201
 })
 
-router.delete('/:path*', updateCache, async (ctx, next) => {
+router.delete('/:path*', async (ctx, next) => {
   const p = J(config.FILES_DIR, ctx.params.path)
   if (!fs.existsSync(p)) {
     ctx.throw(404)
@@ -73,7 +72,7 @@ router.delete('/:path*', updateCache, async (ctx, next) => {
 })
 
 
-router.put('/:path*', updateCache, async (ctx, next) => {
+router.put('/:path*', async (ctx, next) => {
   const src = J(config.FILES_DIR, ctx.params.path)
   if (!fs.existsSync(src)) {
     ctx.throw(404)
