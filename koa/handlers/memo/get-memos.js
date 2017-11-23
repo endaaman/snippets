@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs-extra')
 const yaml = require('js-yaml')
-const config = require('../config')
+const config = require('../../config')
 
 
 const MARKDONW_FILE_REG = /^20\d\d-((10|11|12)|0[1-9])-((30|31)|([1-2][0-9])|(0[1-9]))_.+\.md$/
@@ -77,4 +77,4 @@ async function getMemos() {
   return cached
 }
 
-module.exports = { getMemos }
+module.exports = getMemos
