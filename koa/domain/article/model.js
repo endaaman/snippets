@@ -46,7 +46,7 @@ class Article {
       }
     }
     if (!hasMetaField) {
-      return `${this.content}`
+      return this.content
     }
 
     const metaText = yaml.safeDump(meta, { 'sortKeys': true})

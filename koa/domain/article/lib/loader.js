@@ -43,7 +43,7 @@ function parseMetaText(metaText) {
   if (!metaText) {
     return {
       warning: null,
-      meta: {},
+      meta: null,
     }
   }
 
@@ -53,14 +53,14 @@ function parseMetaText(metaText) {
   } catch (e) {
     return {
       warning: e,
-      meta: {},
+      meta: null,
     }
   }
 
   if (!meta instanceof Object) {
     return {
       warning: 'meta data is not object',
-      meta: {},
+      meta: null,
     }
   }
 
@@ -71,7 +71,7 @@ function parseMetaText(metaText) {
     priority: Joi.number().min(0).integer(),
     tags: Joi.array().items(Joi.string()),
     title: Joi.string(),
-    visiblity: Joi.any().allow(Object.values(Article.Visiblity), null),
+    visiblity: Joi.string().allow(Object.values(Article.Visiblity)),
     updated_at: Joi.date(),
     created_at: Joi.date(),
   }))
@@ -79,7 +79,7 @@ function parseMetaText(metaText) {
   if (result.error) {
     return {
       warning: result.error,
-      meta: {},
+      meta: null,
     }
   }
   return {
@@ -112,10 +112,9 @@ async function loadArticleFile(filename) {
     updated_at: stat.ctime,
     created_at: stat.birthtime,
   }
-
   const article = new Article({
     ...defaultData,
-    ...meta,
+    ...(meta || {}),
     slug: name,
     content: contentText,
   })

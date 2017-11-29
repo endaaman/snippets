@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 
 
-const FILES_DIR = process.env.ENDAAMAN_FILES_DIR || path.join(process.cwd(), 'files')
+const FILES_DIR = process.env.ENDAAMAN_FILES_DIR || path.join(process.cwd(), FILES_DIR_NAME)
 const ARTICLES_DIR_NAME = 'articles'
 const ARTICLES_DIR = path.join(FILES_DIR, ARTICLES_DIR_NAME)
 
