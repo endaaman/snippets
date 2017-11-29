@@ -30,5 +30,17 @@ dependencies {
 }
 
 task hi() {
-    println "hi"
+    android.applicationVariants.all { v ->
+       println v.getCompileClasspath().each { println it.getPath() }
+       def dir = new File("${project.buildDir}/generated/source")
+           if (dir.exists()) {
+               dir.traverse([maxDepth: 0, type: groovy.io.FileType.DIRECTORIES]) {
+                   println "${it.getPath()}/${v.getName()}"
+               }
+           }
+    }
+    android.getBuildToolsVersion()
+    project.getPlugins().each {
+        it.getMetaPropertyValues().each { println it.getName() }
+    }
 }
