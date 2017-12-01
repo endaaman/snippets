@@ -24,7 +24,7 @@ apiApp
   .use(authMiddleware)
   .use(apiRouter.routes())
   .use(apiRouter.allowedMethods())
-  .listen(3000)
+  .listen(3001)
 
 const staticApp = new Koa()
 staticApp.context.token = null
@@ -34,4 +34,4 @@ staticApp
   .use(authMiddleware)
   .use(authStaticMiddleware)
   .use(serve(config.SHARED_DIR))
-  .listen(3001)
+  .listen(3002)
