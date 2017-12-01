@@ -9,4 +9,12 @@ async function getArticles() {
   return getCache()
 }
 
-module.exports = { getArticles }
+async function getArticleBySlug(slug) {
+  const articles = await getArticles()
+  return articles.find((a) => a.slug === slug)
+}
+
+module.exports = {
+  getArticles,
+  getArticleBySlug,
+}

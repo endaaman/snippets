@@ -17,7 +17,6 @@ async function isCacheUpgradeNeeded(data, changedAt) {
 }
 
 async function upgradeCache() {
-
   if (!await isCacheUpgradeNeeded()) {
     console.log('using cache')
     return

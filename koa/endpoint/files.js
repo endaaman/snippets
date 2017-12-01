@@ -20,7 +20,7 @@ router.get('/:path*', async (ctx, next) => {
 })
 
 router.post('/:dir*', async (ctx, next) => {
-  const destDir = J(config.FILES_DIR, ctx.params.dir || '')
+  const destDir = J(config.SHARED_DIR, ctx.params.dir || '')
   const { files, fields } = await busboy(ctx.req)
 
   if (files.length < 1) {
@@ -49,7 +49,7 @@ router.post('/:dir*', async (ctx, next) => {
 })
 
 router.delete('/:path*', async (ctx, next) => {
-  const p = J(config.FILES_DIR, ctx.params.path)
+  const p = J(config.SHARED_DIR, ctx.params.path)
   if (!fs.existsSync(p)) {
     ctx.throw(404)
     return
@@ -73,7 +73,7 @@ router.delete('/:path*', async (ctx, next) => {
 
 
 router.put('/:path*', async (ctx, next) => {
-  const src = J(config.FILES_DIR, ctx.params.path)
+  const src = J(config.SHARED_DIR, ctx.params.path)
   if (!fs.existsSync(src)) {
     ctx.throw(404)
     return
@@ -82,7 +82,7 @@ router.put('/:path*', async (ctx, next) => {
     ctx.throw(400, '`rename_to` field is required')
     return
   }
-  const dest = J(config.FILES_DIR, ctx.request.body.rename_to)
+  const dest = J(config.SHARED_DIR, ctx.request.body.rename_to)
   if (fs.existsSync(dest)) {
     ctx.throw(400, 'File already exists in specified path')
     return

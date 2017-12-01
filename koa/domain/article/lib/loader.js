@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = require('fs-extra')
+const fecha = require('fecha')
 const yaml = require('js-yaml')
 const Joi = require('joi')
 const config = require('../../../config')
@@ -43,7 +44,7 @@ function parseMetaText(metaText) {
   if (!metaText) {
     return {
       warning: null,
-      meta: null,
+      meta: {},
     }
   }
 
@@ -53,39 +54,18 @@ function parseMetaText(metaText) {
   } catch (e) {
     return {
       warning: e,
-      meta: null,
+      meta: {},
     }
   }
 
   if (!meta instanceof Object) {
     return {
       warning: 'meta data is not object',
-      meta: null,
+      meta: {},
     }
   }
 
-  const result = Joi.validate(meta, Joi.object({
-    aliases: Joi.array().items(Joi.string()),
-    category: Joi.string(),
-    digest: Joi.string(),
-    priority: Joi.number().min(0).integer(),
-    tags: Joi.array().items(Joi.string()),
-    title: Joi.string(),
-    visiblity: Joi.string().allow(Object.values(Article.Visiblity)),
-    updated_at: Joi.date(),
-    created_at: Joi.date(),
-  }))
-
-  if (result.error) {
-    return {
-      warning: result.error,
-      meta: null,
-    }
-  }
-  return {
-    warning: null,
-    meta: result.value,
-  }
+  return meta
 }
 
 async function loadArticleFile(filename) {
@@ -100,26 +80,22 @@ async function loadArticleFile(filename) {
     contentText,
   } = splitArticleText(wholeText)
 
-  const { meta, warning } = parseMetaText(metaText)
+  let { meta, warning } = parseMetaText(metaText)
 
-  const defaultData =  {
-    aliases: [],
-    category: null,
-    digest: '',
-    tags: [],
-    title: name,
-    visiblity: meta ? Article.Visiblity.PUBLIC : Article.Visiblity.PRIVATE,
-    updated_at: stat.ctime,
+  const article = new Article(name, contentText)
+  article.extend({
+    date: fecha.format(stat.mtime, 'YYYY-MM-DD'),
     created_at: stat.birthtime,
-  }
-  const article = new Article({
-    ...defaultData,
-    ...(meta || {}),
-    slug: name,
-    content: contentText,
+    updated_at: stat.mtime,
   })
 
-  return { article, warning, filename }
+  const testArticle = article.copy().extend(meta)
+  if (!warning) {
+    testArticle.validate()
+    warning = testArticle.getError()
+  }
+
+  return { article: warning ? testArticle : article, warning, filename }
 }
 
 

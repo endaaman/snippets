@@ -41,7 +41,7 @@ async function walkDir(base, dir, compact) {
 }
 
 function getFiles(dir, compact) {
-  return walkDir(config.FILES_DIR, dir, compact)
+  return walkDir(config.SHARED_DIR, dir, compact)
 }
 
 

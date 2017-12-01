@@ -1,7 +1,7 @@
-const { Article } = require('./model')
-const { getArticles } = require('./handler')
+const model = require('./model')
+const handler = require('./handler')
 
 module.exports = {
-  Article,
-  getArticles,
+  ...model,
+  ...handler,
 }

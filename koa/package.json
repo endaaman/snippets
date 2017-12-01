@@ -1,9 +1,11 @@
 {
   "private": true,
   "dependencies": {
+    "@ronomon/utimes": "^2.1.1",
     "async-busboy": "^0.6.2",
     "bcrypt": "^1.0.3",
     "co-busboy": "^1.4.0",
+    "fecha": "^2.3.2",
     "fs-cp": "^1.4.0",
     "fs-extra": "^4.0.2",
     "glob": "^7.1.2",
@@ -14,7 +16,8 @@
     "koa-body": "^2.5.0",
     "koa-bodyparser": "^4.2.0",
     "koa-json": "^2.0.2",
-    "koa-router": "^7.3.0"
+    "koa-router": "^7.3.0",
+    "koa-static": "^4.0.2"
   },
   "scripts": {
     "start": "node index.js",
