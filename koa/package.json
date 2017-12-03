@@ -1,6 +1,7 @@
 {
   "private": true,
   "dependencies": {
+    "@koa/cors": "^2.2.1",
     "@ronomon/utimes": "^2.1.1",
     "async-busboy": "^0.6.2",
     "bcrypt": "^1.0.3",
@@ -21,7 +22,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "watch": "nodemon --watch ./ index.js"
+    "watch": "nodemon --watch ./ index.js --ignore node_modules/"
   },
   "devDependencies": {
     "nodemon": "^1.12.1"

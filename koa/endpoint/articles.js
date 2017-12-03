@@ -4,21 +4,6 @@ const config = require('../config')
 const { Article, getArticles, getArticleBySlug } = require('../domain/article')
 
 
-function getValidator() {
-  return {
-    aliases    : Joi.array().items(Joi.string()),
-    category   : Joi.string(),
-    digest     : Joi.string(),
-    priority   : Joi.number().min(0).integer(),
-    tags       : Joi.array().items(Joi.string()),
-    title      : Joi.string(),
-    visiblity  : Joi.any().allow(Object.values(Article.Visiblity), null),
-    date       : Joi.string().regex(config.DATE_REGEXP),
-    created_at : Joi.date().allow(null),
-    updated_at : Joi.date().allow(null),
-  }
-}
-
 const router = new Router()
 
 router.get('/', async (ctx, next) => {

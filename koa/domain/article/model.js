@@ -8,10 +8,11 @@ const yaml = require('js-yaml')
 const config = require('../../config')
 
 const Visiblity = {
-  PUBLIC: 'public',
-  HIDDEN: 'hidden',
-  SECRET: 'secret',
-  PRIVATE: 'private',
+  PUBLIC: 'public',   // 公開
+  HIDDEN: 'hidden',   // 公開、リンクあり、トップに表示しないだけ
+  SECRET: 'secret',   // 公開、リンクなし
+  SPECIAL: 'special', // 公開、特殊ページ
+  PRIVATE: 'private', // 非公開、俺用
 }
 
 const META_DELIMITTER = '---'

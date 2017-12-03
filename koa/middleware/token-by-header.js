@@ -1,6 +1,5 @@
 module.exports = async (ctx, next) => {
   const authStyle = 'Bearer'
-
   if (!ctx.request.header.authorization) {
     await next()
     return
@@ -12,5 +11,6 @@ module.exports = async (ctx, next) => {
     await next()
     return
   }
-  ctx.authorized = parts[1]
+  ctx.token = parts[1]
+  await next()
 }

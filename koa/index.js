@@ -4,6 +4,7 @@ const Router = require('koa-router')
 const koaJson = require('koa-json')
 const koaBody = require('koa-bodyparser')
 const serve = require('koa-static')
+const cors = require('@koa/cors');
 
 const config = require('./config')
 
@@ -19,9 +20,13 @@ apiApp.context.token = null
 apiApp.context.authorized = false
 apiApp
   .use(koaJson({pretty: false, param: 'pretty'}))
+  .use(cors({
+    origin: ['http://localhost:3000'],
+    allowMethods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    allowHeaders: ['Content-Type', 'Authorization', 'Accept', 'If-Modified-Since'],
+  }))
   .use(koaBody())
   .use(tokenByHeaderMiddleware)
-  .use(authMiddleware)
   .use(apiRouter.routes())
   .use(apiRouter.allowedMethods())
   .listen(3001)
