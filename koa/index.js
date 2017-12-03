@@ -3,6 +3,7 @@ const Koa = require('koa')
 const Router = require('koa-router')
 const koaJson = require('koa-json')
 const koaBody = require('koa-bodyparser')
+const logger = require('koa-logger')
 const serve = require('koa-static')
 const cors = require('@koa/cors');
 
@@ -25,8 +26,10 @@ apiApp
     allowMethods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
     allowHeaders: ['Content-Type', 'Authorization', 'Accept', 'If-Modified-Since'],
   }))
+  .use(logger())
   .use(koaBody())
   .use(tokenByHeaderMiddleware)
+  .use(authMiddleware)
   .use(apiRouter.routes())
   .use(apiRouter.allowedMethods())
   .listen(3001)

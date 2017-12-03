@@ -28,7 +28,12 @@ router.post('/', async (ctx, next) => {
 })
 
 router.get('/', async (ctx, next) => {
-  ctx.body = ctx.authorized ? 'ok' : 'not authorized'
+  if (ctx.authorized) {
+    ctx.status = 204
+  } else {
+    ctx.status = 401
+  }
+
 })
 
 module.exports = router
