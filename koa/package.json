@@ -2,10 +2,8 @@
   "private": true,
   "dependencies": {
     "@koa/cors": "^2.2.1",
-    "@ronomon/utimes": "^2.1.1",
     "async-busboy": "^0.6.2",
     "bcrypt": "^1.0.3",
-    "co-busboy": "^1.4.0",
     "fecha": "^2.3.2",
     "fs-cp": "^1.4.0",
     "fs-extra": "^4.0.2",
@@ -15,7 +13,6 @@
     "jsonwebtoken": "^8.1.0",
     "koa": "^2.4.1",
     "koa-body": "^2.5.0",
-    "koa-bodyparser": "^4.2.0",
     "koa-json": "^2.0.2",
     "koa-logger": "^3.1.0",
     "koa-router": "^7.3.0",

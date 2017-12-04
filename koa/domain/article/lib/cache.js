@@ -18,10 +18,8 @@ async function isCacheUpgradeNeeded(data, changedAt) {
 
 async function upgradeCache() {
   if (!await isCacheUpgradeNeeded()) {
-    console.log('using cache')
     return
   }
-  console.log('update cache')
 
   const results = await loadArticleFiles()
 
@@ -47,7 +45,7 @@ async function upgradeCache() {
     await fs.writeFile(warningFilePath, JSON.stringify(warnings,null, 2))
   } else {
     console.warn('no warnings')
-    await fs.writeFile(warningFilePath, 'no warning')
+    await fs.writeFile(warningFilePath, '{}')
   }
 }
 

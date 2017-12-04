@@ -14,7 +14,6 @@ module.exports = async (ctx, next) => {
     const decoded = await jwtVerify(token, config.SECRET_KEY_BASE)
   }
   catch (e) {
-    console.log(e)
     ctx.body = e
     await next()
     return

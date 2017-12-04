@@ -1,6 +1,5 @@
-const path = require('path')
+const pa = require('path')
 const fs = require('fs-extra')
-const util = require('util')
 const fecha = require('fecha')
 const Joi = require('joi')
 const yaml = require('js-yaml')
@@ -22,20 +21,16 @@ const META_FIELDS = [
     key: 'aliases',
     fill: (v) => v && v.length,
   }, {
-    key: 'category',
-    fill: (v) => v,
+    key: 'title',
   }, {
     key: 'digest',
-    fill: (v) => v,
   }, {
-    key: 'priority',
-    fill: (v) => !!v,
+    key: 'image',
   }, {
     key: 'tags',
     fill: (v) => v && v.length,
   }, {
-    key: 'title',
-    fill: (v) => v,
+    key: 'priority',
   }, {
     key: 'visiblity',
     fill: (v) => !!v && v !== Visiblity.PUBLIC,
@@ -51,8 +46,10 @@ const META_FIELDS = [
 
 const FIELD_ERROR = Symbol()
 
-function getFilepath(slug) {
-  return path.join(config.ARTICLES_DIR, slug + '.md')
+const REG_SLUG = /^(?:[a-z0-9-_]+|(?:[a-z0-9-_]+\/[a-z0-9-_]+))$/
+
+function getArticlePath(slug) {
+  return pa.join(config.ARTICLES_DIR, slug + '.md')
 }
 
 class Article {
@@ -64,15 +61,16 @@ class Article {
     return META_DELIMITTER
   }
 
-  constructor(name, content) {
-    this.slug = name
+  constructor(slug, content) {
+    this.slug = slug
     this.content = content
 
     this.aliases = []
-    this.category = null
+    this.title = slug.split('/').pop()
+    this.image = ''
     this.digest = ''
     this.tags = []
-    this.title = name
+    this.priority = 0
     this.visiblity = Article.Visiblity.PUBLIC
 
     const d = new Date()
@@ -82,32 +80,28 @@ class Article {
   }
 
   extend(obj) {
-    util._extend(this, obj)
-    return this
+    return Object.assign(this, obj)
   }
 
   copy(obj) {
-    const a = new Article()
-    a.extend(this)
-    return a
+    return (new Article(this.slug, this.content)).extend(this)
   }
 
   validate() {
     const result = Joi.validate(this, Joi.object({
-      slug: Joi.string(),
-      content: Joi.string(),
+      slug: Joi.string().regex(REG_SLUG),
       aliases: Joi.array().items(Joi.string()),
-      category: Joi.string().allow(null),
-      digest: Joi.string().allow(''),
-      priority: Joi.number().min(0).integer(),
-      tags: Joi.array().items(Joi.string()),
       title: Joi.string(),
+      digest: Joi.string().allow(''),
+      image: Joi.string().allow(''),
+      tags: Joi.array().items(Joi.string()),
+      content: Joi.string(),
+      priority: Joi.number().min(0).integer(),
       visiblity: Joi.string().allow(Object.values(Article.Visiblity)),
       date : Joi.date(),
       created_at : Joi.date(),
       updated_at : Joi.date(),
     }))
-
 
     if (result.error) {
       this[FIELD_ERROR] = result.error
@@ -122,11 +116,12 @@ class Article {
     return this[FIELD_ERROR]
   }
 
-  toMarkdown() {
+  toText() {
     let hasMetaField = false
     const meta = {}
     for (const field of META_FIELDS) {
-      if (field.fill(this[field.key], this)) {
+      const fill = field.fill || ((v) => !!v)
+      if (fill(this[field.key], this)) {
         meta[field.key] = this[field.key]
         hasMetaField = true
       }
@@ -140,33 +135,52 @@ class Article {
   }
 
   async create() {
-    const filepath = getFilepath(this.slug)
+    const filepath = getArticlePath(this.slug)
     if (fs.existsSync(filepath)) {
       throw new Error(`slug: \`${this.slug}\` is duplicated`)
       return
     }
-    await fs.writeFile(filepath, this.toMarkdown())
+    await this.write(true)
   }
 
   async update(oldSlug) {
     if (!oldSlug) {
-      throw new Error('`oldSlug` param is needed for Article.update(oldSlug)')
+      throw new Error('`oldSlug` param is needed for Article.update()')
       return
     }
 
-    const filepath = getFilepath(this.slug)
-    if (this.slug !== oldSlug) {
+    const newly = this.slug !== oldSlug
+
+    await this.write(newly)
+
+    if (newly) {
+      await fs.unlink(getArticlePath(oldSlug))
+    }
+  }
+
+  async write(newly) {
+    const filepath = getArticlePath(this.slug)
+    if (newly) {
       if (fs.existsSync(filepath)) {
         throw new Error(`slug: \`${this.slug}\` is duplicated`)
         return
       }
     }
+    await fs.ensureFile(filepath)
+    await fs.writeFile(filepath, this.toText())
+  }
 
-    await fs.writeFile(filepath, this.toMarkdown())
-
-    if (this.slug != oldSlug) {
-      await fs.unlink(getFilepath(oldSlug))
+  async delete(obj) {
+    const path = getArticlePath(this.slug)
+    if (!fs.existsSync(path)) {
+      throw new Error(`can not unlink \`${path}\``)
+      return
     }
+    await fs.unlink(path)
+  }
+
+  isSecret() {
+    return this.visiblity === Visiblity.SECRET
   }
 }
 

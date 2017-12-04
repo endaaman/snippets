@@ -9,7 +9,9 @@ const { Article } = require('../model')
 
 const MARKDONW_FILE_REG = /^.+\.md$/
 
-function trimExtension(s) { 
+const J = path.join.bind(path)
+
+function trimExtension(s) {
   const i = s.lastIndexOf('.')
   return i < 0 ? s : s.substr(0, i)
 }
@@ -40,7 +42,7 @@ function splitArticleText(wholeText) {
 }
 
 
-function parseMetaText(metaText) { 
+function parseMetaText(metaText) {
   if (!metaText) {
     return {
       warning: null,
@@ -65,15 +67,20 @@ function parseMetaText(metaText) {
     }
   }
 
-  return meta
+  return {
+    warning: null,
+    meta,
+  }
 }
 
-async function loadArticleFile(filename) {
-  const filepath = path.join(config.ARTICLES_DIR, filename)
+async function loadArticleFile(relative) {
+  const filepath = J(config.ARTICLES_DIR, relative)
 
   const stat = await fs.stat(filepath)
-  const name = trimExtension(filename)
 
+  const splitted = relative.split('/')
+
+  const slug = trimExtension(relative)
   const wholeText = await fs.readFile(filepath, 'utf-8')
   const {
     metaText,
@@ -82,7 +89,7 @@ async function loadArticleFile(filename) {
 
   let { meta, warning } = parseMetaText(metaText)
 
-  const article = new Article(name, contentText)
+  const article = new Article(slug, contentText)
   article.extend({
     date: fecha.format(stat.mtime, 'YYYY-MM-DD'),
     created_at: stat.birthtime,
@@ -95,17 +102,37 @@ async function loadArticleFile(filename) {
     warning = testArticle.getError()
   }
 
-  return { article: warning ? testArticle : article, warning, filename }
+  return { article: (warning ? article : testArticle), warning, relative }
 }
 
-
 async function loadArticleFiles() {
-  const filenames = (await fs.readdir(config.ARTICLES_DIR))
-    .filter(name =>  MARKDONW_FILE_REG.test(name) )
+  const BASE = config.ARTICLES_DIR
+  if (!fs.existsSync(BASE)) {
+    await fs.mkdir(BASE)
+    return []
+  }
+
+  const baseFilenames = await fs.readdir(BASE)
+
+  const categortSlugs = (await Promise.all(baseFilenames.map(slug => {
+    return fs.stat(path.join(BASE, slug)).then((stat) => ({stat, slug}))
+  })))
+    .filter((v) => v.stat.isDirectory())
+    .map((v) => v.slug)
 
   const wg = []
-  for (const filename of filenames) {
-    wg.push(loadArticleFile(filename))
+  baseFilenames
+    .filter(name => MARKDONW_FILE_REG.test(name))
+    .forEach((v) => {
+      wg.push(loadArticleFile(v, null))
+    })
+
+  for (const categorySlug of categortSlugs) {
+    (await fs.readdir(J(BASE, categorySlug)))
+      .filter(name => MARKDONW_FILE_REG.test(name))
+      .forEach((name) => {
+        wg.push(loadArticleFile(J(categorySlug, name)))
+      })
   }
   return await Promise.all(wg)
 }
