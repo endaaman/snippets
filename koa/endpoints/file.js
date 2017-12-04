@@ -1,4 +1,4 @@
-const path = require('path')
+const pa = require('path')
 const fs = require('fs-extra')
 const busboy = require('async-busboy')
 const Router = require('koa-router')

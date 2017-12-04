@@ -1,7 +1,7 @@
 const model = require('./model')
-const handler = require('./handler')
+const loader = require('./loader')
 
 module.exports = {
   ...model,
-  ...handler,
+  ...loader,
 }

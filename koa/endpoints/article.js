@@ -1,7 +1,8 @@
 const Router = require('koa-router')
 const Joi = require('joi')
 const config = require('../config')
-const { Article, getArticles, getArticleBySlug } = require('../domain/article')
+const { Article } = require('../domains/article')
+const { getArticles, getArticleBySlug } = require('../handlers/getter')
 
 
 const router = new Router()

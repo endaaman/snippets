@@ -1,15 +1,16 @@
-const path = require('path')
+const pa = require('path')
 const fs = require('fs-extra')
 const fecha = require('fecha')
 const yaml = require('js-yaml')
 const Joi = require('joi')
-const config = require('../../../config')
-const { Article } = require('../model')
+const config = require('../../config')
+const { Article } = require('./model')
 
 
 const MARKDONW_FILE_REG = /^.+\.md$/
+const NG_FIELDS = ['slug', 'content']
 
-const J = path.join.bind(path)
+const J = pa.join.bind(pa)
 
 function trimExtension(s) {
   const i = s.lastIndexOf('.')
@@ -73,7 +74,7 @@ function parseMetaText(metaText) {
   }
 }
 
-async function loadArticleFile(relative) {
+async function loadArticle(relative) {
   const filepath = J(config.ARTICLES_DIR, relative)
 
   const stat = await fs.stat(filepath)
@@ -90,6 +91,11 @@ async function loadArticleFile(relative) {
   let { meta, warning } = parseMetaText(metaText)
 
   const article = new Article(slug, contentText)
+
+  if (NG_FIELDS.some((k) => k in meta)) {
+    return { article, warning: `${JSON.stringify(NG_FIELDS)} is defined in meta` }
+  }
+
   article.extend({
     date: fecha.format(stat.mtime, 'YYYY-MM-DD'),
     created_at: stat.birthtime,
@@ -97,15 +103,13 @@ async function loadArticleFile(relative) {
   })
 
   const testArticle = article.copy().extend(meta)
-  if (!warning) {
-    testArticle.validate()
-    warning = testArticle.getError()
+  if (testArticle.validate()) {
+    return { article, warning: testArticle.getError() }
   }
-
-  return { article: (warning ? article : testArticle), warning, relative }
+  return { article: testArticle, warning: null }
 }
 
-async function loadArticleFiles() {
+async function loadArticles() {
   const BASE = config.ARTICLES_DIR
   if (!fs.existsSync(BASE)) {
     await fs.mkdir(BASE)
@@ -115,7 +119,7 @@ async function loadArticleFiles() {
   const baseFilenames = await fs.readdir(BASE)
 
   const categortSlugs = (await Promise.all(baseFilenames.map(slug => {
-    return fs.stat(path.join(BASE, slug)).then((stat) => ({stat, slug}))
+    return fs.stat(J(BASE, slug)).then((stat) => ({stat, slug}))
   })))
     .filter((v) => v.stat.isDirectory())
     .map((v) => v.slug)
@@ -124,19 +128,33 @@ async function loadArticleFiles() {
   baseFilenames
     .filter(name => MARKDONW_FILE_REG.test(name))
     .forEach((v) => {
-      wg.push(loadArticleFile(v, null))
+      wg.push(loadArticle(v, null))
     })
 
   for (const categorySlug of categortSlugs) {
     (await fs.readdir(J(BASE, categorySlug)))
       .filter(name => MARKDONW_FILE_REG.test(name))
       .forEach((name) => {
-        wg.push(loadArticleFile(J(categorySlug, name)))
+        wg.push(loadArticle(J(categorySlug, name)))
       })
   }
-  return await Promise.all(wg)
+  const results = await Promise.all(wg)
+
+  const articles = []
+  const warnings = []
+  results.forEach((result) => {
+    if (result.warning) {
+      warnings.push({
+        slug: result.article.slug,
+        warning: result.warning,
+      })
+    }
+    articles.push(result.article)
+  })
+
+  return { articles, warnings }
 }
 
 module.exports = {
-  loadArticleFiles
+  loadArticles
 }

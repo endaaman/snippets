@@ -61,6 +61,14 @@ class Article {
     return META_DELIMITTER
   }
 
+  getError() {
+    return this[FIELD_ERROR]
+  }
+
+  isSecret() {
+    return this.visiblity === Visiblity.SECRET
+  }
+
   constructor(slug, content) {
     this.slug = slug
     this.content = content
@@ -83,7 +91,7 @@ class Article {
     return Object.assign(this, obj)
   }
 
-  copy(obj) {
+  copy() {
     return (new Article(this.slug, this.content)).extend(this)
   }
 
@@ -110,10 +118,6 @@ class Article {
       this[FIELD_ERROR] = null
       return true
     }
-  }
-
-  getError() {
-    return this[FIELD_ERROR]
   }
 
   toText() {
@@ -177,10 +181,6 @@ class Article {
       return
     }
     await fs.unlink(path)
-  }
-
-  isSecret() {
-    return this.visiblity === Visiblity.SECRET
   }
 }
 

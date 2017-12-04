@@ -1,9 +1,10 @@
-const path = require('path')
+const pa = require('path')
 const fs = require('fs-extra')
 const cp = require('fs-cp')
 const config = require('../config')
 
-function J(...args) { return path.join(...args) }
+
+const J = pa.join.bind(pa)
 
 function convertStatToData(stat, name, dir, compact) {
   if (compact) {

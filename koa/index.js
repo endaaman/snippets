@@ -1,4 +1,3 @@
-const path = require('path')
 const Koa = require('koa')
 const Router = require('koa-router')
 const koaJson = require('koa-json')
@@ -6,15 +5,26 @@ const koaBody = require('koa-bodyparser')
 const logger = require('koa-logger')
 const serve = require('koa-static')
 const cors = require('@koa/cors');
-
 const config = require('./config')
-
 const tokenByHeaderMiddleware = require('./middleware/token-by-header')
 const tokenByCookieMiddleware = require('./middleware/token-by-cookie')
 const authMiddleware = require('./middleware/auth')
 const authStaticMiddleware = require('./middleware/auht-static')
-const apiRouter = require('./endpoint')
+const sessionRouter = require('./endpoints/session')
+const articleRouter = require('./endpoints/article')
+const categoryRouter = require('./endpoints/category')
+const fileRouter = require('./endpoints/file')
 
+
+const apiRouter = new Router()
+apiRouter
+  .use('/sessions', sessionRouter.routes(), sessionRouter.allowedMethods())
+  .use('/articles', articleRouter.routes(), articleRouter.allowedMethods())
+  .use('/categories', categoryRouter.routes(), categoryRouter.allowedMethods())
+  .use('/files', fileRouter.routes(), fileRouter.allowedMethods())
+  .get('/', (ctx) => {
+    ctx.body = { message: 'Hi, this is endaaman\' api server' }
+  })
 
 const apiApp = new Koa()
 apiApp.context.token = null
